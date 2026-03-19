@@ -304,10 +304,10 @@
             return md;
         }
 
-        const copyButtonResetTimers = new WeakMap();
+        const resetTimers = new WeakMap();
 
         function resetCopyButton(button) {
-            const existingTimerId = copyButtonResetTimers.get(button);
+            const existingTimerId = resetTimers.get(button);
             if (existingTimerId) {
                 window.clearTimeout(existingTimerId);
             }
@@ -317,7 +317,7 @@
                 button.setAttribute('aria-label', 'Copy code block');
                 button.dataset.copyState = 'idle';
             }, 2000);
-            copyButtonResetTimers.set(button, timerId);
+            resetTimers.set(button, timerId);
         }
 
         async function copyText(text) {
@@ -340,7 +340,7 @@
 
             try {
                 if (!document.execCommand('copy')) {
-                    throw new Error('Copy command was unsuccessful in the fallback clipboard path');
+                    throw new Error('Failed to copy code to clipboard');
                 }
             } finally {
                 document.body.removeChild(textArea);
@@ -348,12 +348,12 @@
         }
 
         function enhanceCodeBlocks() {
-            document.querySelectorAll('#markdown-content pre').forEach((pre) => {
-                if (pre.querySelector('.code-copy-button')) {
+            document.querySelectorAll('#markdown-content pre code').forEach((code) => {
+                const pre = code.parentElement;
+                if (!pre || pre.querySelector('.code-copy-button')) {
                     return;
                 }
 
-                const code = pre.querySelector('code');
                 const text = code?.textContent?.trimEnd();
                 if (!text) {
                     return;

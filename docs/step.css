@@ -11,6 +11,7 @@
             --success-green: #4ec9b0;
             --warning-yellow: #dcdcaa;
             --code-copy-bg: rgba(10, 10, 15, 0.85);
+            --code-copy-offset: 2.75rem;
         }
 
         * {
@@ -336,7 +337,7 @@
             background: var(--bg-code);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 2.75rem 1.25rem 1.25rem;
+            padding: var(--code-copy-offset) 1.25rem 1.25rem;
             overflow-x: auto;
             margin: 1.5rem 0;
             position: relative;
