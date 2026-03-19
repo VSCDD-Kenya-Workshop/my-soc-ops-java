@@ -314,6 +314,7 @@
 
             const timerId = window.setTimeout(() => {
                 button.textContent = 'Copy';
+                button.setAttribute('aria-label', 'Copy code block');
                 button.dataset.copyState = 'idle';
             }, 2000);
             copyButtonResetTimers.set(button, timerId);
@@ -364,14 +365,17 @@
                 button.textContent = 'Copy';
                 button.dataset.copyState = 'idle';
                 button.setAttribute('aria-label', 'Copy code block');
+                button.setAttribute('aria-live', 'polite');
 
                 button.addEventListener('click', async () => {
                     try {
                         await copyText(text);
                         button.textContent = 'Copied!';
+                        button.setAttribute('aria-label', 'Code copied');
                         button.dataset.copyState = 'copied';
                     } catch (error) {
                         button.textContent = 'Failed';
+                        button.setAttribute('aria-label', 'Copy failed');
                         button.dataset.copyState = 'error';
                     }
 
