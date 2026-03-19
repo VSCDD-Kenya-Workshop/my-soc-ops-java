@@ -304,6 +304,71 @@
             return md;
         }
 
+        function resetCopyButton(button) {
+            window.clearTimeout(button.resetTimer);
+            button.resetTimer = window.setTimeout(() => {
+                button.textContent = 'Copy';
+                button.dataset.copyState = 'idle';
+            }, 2000);
+        }
+
+        async function copyText(text) {
+            if (navigator.clipboard?.writeText && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.setAttribute('readonly', '');
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function enhanceCodeBlocks() {
+            document.querySelectorAll('#markdown-content pre').forEach((pre) => {
+                if (pre.querySelector('.code-copy-button')) {
+                    return;
+                }
+
+                const code = pre.querySelector('code');
+                const text = code?.textContent?.trimEnd();
+                if (!text) {
+                    return;
+                }
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'code-copy-button';
+                button.textContent = 'Copy';
+                button.dataset.copyState = 'idle';
+                button.setAttribute('aria-label', 'Copy code block');
+
+                button.addEventListener('click', async () => {
+                    try {
+                        await copyText(text);
+                        button.textContent = 'Copied!';
+                        button.dataset.copyState = 'copied';
+                    } catch (error) {
+                        button.textContent = 'Failed';
+                        button.dataset.copyState = 'error';
+                    }
+
+                    resetCopyButton(button);
+                });
+
+                pre.appendChild(button);
+            });
+        }
+
         // Load and render markdown
         async function loadContent() {
             const idx = getCurrentStepIndex();
@@ -341,6 +406,8 @@
                 document.querySelectorAll('.markdown input[type="checkbox"]').forEach((checkbox) => {
                     checkbox.disabled = false;
                 });
+
+                enhanceCodeBlocks();
 
                 // If this is the completion page, add confetti!
                 if (step.id === '05-complete') {
